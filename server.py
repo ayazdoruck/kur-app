@@ -5,8 +5,18 @@ app = Flask(__name__)
 
 @app.route("/kur")
 def kur():
-    r = requests.get("https://finans.truncgil.com/v4/today.json")
-    return jsonify(r.json())
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (compatible; ESP8266; +https://github.com/truncgil/Finans)"
+        }
+        r = requests.get("https://finans.truncgil.com/v4/today.json", headers=headers, timeout=5)
+        r.raise_for_status()  # HTTP hatalarını yakalar
+        data = r.json()  # JSON'a çevir
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-app.run(host="0.0.0.0", port=10000)
-
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
